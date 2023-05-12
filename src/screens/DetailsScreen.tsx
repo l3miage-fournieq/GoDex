@@ -1,7 +1,8 @@
-import React, {Image, ScrollView, StyleSheet, Text, View} from 'react-native';
+import React, {Image, StyleSheet, Switch, Text, View} from 'react-native';
 import {useRoute} from '@react-navigation/native';
-import { getEvolutions, getPokemon } from "../services/pokemonService";
+import {getPokemon} from '../services/pokemonService';
 import {useEffect, useState} from 'react';
+import Stats from '../components/details/Stats';
 
 const types = {
   bug: require('../assets/types/bug.webp'),
@@ -32,9 +33,12 @@ function capitalize(str: string | null): string | null {
 }
 
 export default function DetailsScreen(): JSX.Element {
-  const route = useRoute();
+  const route= useRoute();
   const [pokemonDetails, setPokemonDetails] = useState();
-  const [pokemonEvos, setPokemonEvos] = useState();
+
+  const [isEnabled, setIsEnabled] = useState(false);
+  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+
   useEffect(() => {
     async function fetchData() {
       const result = await getPokemon(route.params.id);
@@ -42,7 +46,6 @@ export default function DetailsScreen(): JSX.Element {
     }
     fetchData();
   }, [route.params.id]);
-
 
   let type1: any;
   switch (pokemonDetails?.types[0]?.type?.name) {
@@ -164,7 +167,7 @@ export default function DetailsScreen(): JSX.Element {
   }
 
   return (
-    <ScrollView style={{backgroundColor: 'white'}}>
+    <View style={{position: 'absolute', top: 0, bottom: 0, right: 0, left: 0}}>
       <View
         style={{
           width: '100%',
@@ -226,7 +229,32 @@ export default function DetailsScreen(): JSX.Element {
           />
         </View>
       </View>
-    </ScrollView>
+      <View
+        style={{
+          display: 'flex',
+          width: '100%',
+          alignItems: 'center',
+          marginBottom: 10,
+          marginTop: 20,
+        }}>
+        <Stats
+          hp={pokemonDetails?.stats?.[0]?.base_stat}
+          attack={pokemonDetails?.stats?.[1]?.base_stat}
+          attackSpe={pokemonDetails?.stats?.[3]?.base_stat}
+          defenceSpe={pokemonDetails?.stats?.[4]?.base_stat}
+          defence={pokemonDetails?.stats?.[2]?.base_stat}
+        />
+      </View>
+      <View style={{marginTop: 100}}>
+        <Switch
+          trackColor={{false: '#767577', true: '#81b0ff'}}
+          thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
+          ios_backgroundColor="#3e3e3e"
+          onValueChange={toggleSwitch}
+          value={isEnabled}
+        />
+      </View>
+    </View>
   );
 }
 
